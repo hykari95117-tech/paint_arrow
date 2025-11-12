@@ -52,9 +52,13 @@ export default function Game() {
 
     // arrow state 바뀔 때만
     useEffect(() => {
+        // 일정 시간이 지나도 키 입력 자체를 하지 않았을 때
+        let rightKeyPressed :boolean = false;
+
         const callbackFn = (event :KeyboardEvent) => {
             const userPressedKey = arrowObj[event.code];
             if(arrow === userPressedKey) {
+                rightKeyPressed = true;
                 // 맞을 때마다 점수 +100
                 setScore(current => {
                     // 점수가 1000의 배수일 경우 level up
@@ -83,25 +87,26 @@ export default function Game() {
         
         window.addEventListener("keydown", callbackFn);
 
-        // const interval = setInterval(() => {
-        //     const randomIndex = Math.floor(Math.random() * arrows.length);
-        //     setArrow(arrows[randomIndex]);
-        
-        //     window.addEventListener("keydown", (event) => {
-        //         const userPressedKey = arrowObj[event.code];
-        //         if(arrow === userPressedKey) {
-        //             console.log("O");
-        //         } else {
-        //             console.log("X");
-        //         }
-        //     });
-        // }, 2000);
+        setTimeout(() => {
+            // 시간 내에 올바른 키 입력 못해도 목숨 감소, 0 되면 게임 종료
+            // 이때에도 화살표 방향을 바꿀까? 아니면 그대로 둘까?
+            if(!rightKeyPressed) {
+                console.log(`key 눌러`);
+                setLife((current) => {
+                    if(current === 1) {
+                        setOver(true);
+                    }
+                    return current - 1;
+                });
+            }
+        }, timeRef.current);
 
         
 
         // unmount
         return () => {
             window.removeEventListener("keydown", callbackFn);
+            // clearInterval(interval);
         };
     }, [arrow, life]);
 
